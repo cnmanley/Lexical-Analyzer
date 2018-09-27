@@ -166,13 +166,13 @@ nextToken = RIGHT_PAREN;
 
 break;
 
-// case '+':
+case '+':
 
-// addChar();
+addChar();
 
-// nextToken = ADD_OP;
+nextToken = ADD_OP;
 
-// break;
+break;
 
 case '-':
 

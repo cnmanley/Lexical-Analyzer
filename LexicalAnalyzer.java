@@ -1,225 +1,232 @@
-//Austin G. Nolting
-//Simple arithmatic lexical analyzer
-//10.9.2018
-//CSCI 4200DB
+package lexicalAnalyzerPackage;
 
-package lexicalAnalyzer;
-import java.io.*;
-import java.lang.*;
+//Lexical Analyzer
+//Vlad Popescu
+//CSCI-4200 DB
+//Abi Salimi
+
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+//Enumerate character classes along with setter and getter for retrieval
+//Return int
+enum CharacterClass{
+  LETTER(0), 
+  DIGIT(1), 
+  UNKNOWN(99),
+  EOF(-1);
+  
+  private int value;
+  
+  private CharacterClass(int value){
+      this.value = value;
+  }
+  public int getValue(){
+      return value;
+  }
+}
 
+//Enumerate token codes along with getter and setter for retrieval
+//Return string
+enum TokenCodes{
+  INT_LIT("INT_LIT"), 
+  IDENT("IDENT"), 
+  ASSIGN_OP("ASSIGN_OP"), 
+  ADD_OP("ADD_OP"),
+  SUB_OP("SUB_OP"), 
+  MULT_OP("MULT_OP"), 
+  DIV_OP("DIV_OP"), 
+  LEFT_PAREN("LEFT_PAREN"),
+  RIGHT_PAREN("RIGHT_PAREN"), 
+  EOF("END_OF_FILE");
+  
+  private String value;
+  
+  private TokenCodes(String value){
+      this.value = value;
+  }
+  public String getValue(){
+      return value;
+  }
+}
 
 public class LexicalAnalyzer {
-//	Global declarations
-	public static int lexLen;
-	public static String charClass;
-	public static String token;
-	public static String nextToken;
-	public static char[] lexeme = new char[100];
-	public static char nextChar;
-	public static int index = 0;
-	public static String line;
-	
-	//Character classes
-	public static final String LETTER = "0";
-	public static final String DIGIT = "1";
-	public static final String UNKNOWN = "99";
-	
-	//Token Codes
-	public static final String INT_LIT = "INT_LIT";
-	public static final String IDENT = "IDENT";
-	public static final String ASSIGN_OP = "ASSIGN_OP";
-	public static final String ADD_OP = "ADD_OP";
-	public static final String SUB_OP = "SUB_OP";
-	public static final String MULT_OP = "MULT_OP";
-	public static final String DIV_OP = "DIV_OP";
-	public static final String LEFT_PAREN = "LEFT_PAREN";
-	public static final String RIGHT_PAREN = "RIGHT_PAREN";
-	public static final String EOF = "END_OF_FILE";
-	
-	//Begin main driver
-	public static void main(String[] args) throws IOException
-	{
-		//opens txt file for processing
-		try{
-			File input = new File("lexInput.txt");
-			BufferedReader br = new BufferedReader(new FileReader(input));
-			System.out.println("\nAustin Nolting, CSCI4200-DB, Fall 2018, Lexical Analyzer");
-			line = br.readLine();
-			while(line != null){			
-	        	System.out.println("********************************************************************************");
-	        	System.out.println("Input: " + line);
-	        	nextLine();
-				getChar();
-				do { 
-					lex();
-//					System.out.println("In do while after Lex()");
-				} while (nextToken != EOF);
-				System.out.println("********************************************************************************");
 
-			line = br.readLine();
-			}//end of while loop
-			System.out.printf("Next token is: %-15s Next lexeme is ", nextToken);
-			System.out.println(lexeme);
-			System.out.println("Lexical analysis of the program is complete!");
-		}//end of try
-		catch (IOException e){
-			System.out.println("ERROR - cannot open file");
-		} 
-		
-	}//End main driver
-	
-	
-	//Begin lookup  - a function to lookup operators
-	public static String lookup(char ch){
-		switch(ch){
-		case '(':
-			addChar();
-			nextToken = LEFT_PAREN;
-			break;
-		case ')':
-			addChar();
-			nextToken = RIGHT_PAREN;
-			break;
-		case '+':
-			addChar();
-			nextToken = ADD_OP;
-			break;
-		case '-':
-			addChar();
-			nextToken = SUB_OP;
-			break;
-		case '*':
-			addChar();
-			nextToken = MULT_OP;
-			break;
-		case '/':
-			addChar();
-			nextToken = DIV_OP;
-			break;
-		case '=':
-			addChar();
-			nextToken = ASSIGN_OP;
-			break;
-		default:
-			addChar();
-			nextToken = EOF;
-			break;
-		}//end switch(ch)
-		return nextToken;
-	}//end lookup
-
-	//begin addChar method
-	public static void addChar(){
-		if (lexLen <= 98) {
-			lexeme[lexLen++] = nextChar;
-			lexeme[lexLen] = 0;
-		}//end if statement
-		else
-			System.out.println("Error: Lexeme is too long");
-	}//end addChar method
-	
-	//begin getChar method
-	public static void getChar() throws IOException{
-		if (isThere()) {
-			if(Character.isLetter(nextChar))
-				charClass = LETTER;
-			else if(Character.isDigit(nextChar))
-				charClass = DIGIT;
-			else
-				charClass = UNKNOWN;
-		}//end if statement
-		else
-			charClass = EOF;
-		
-		
-	}//end getChar method
-	
-	//begin getNonBlank method
-	public static void getNonBlank() throws IOException {
-		while (Character.isWhitespace(nextChar)){
-			getChar();
-		}//end while statement
-	}//end method getNonBlank
-	
-	//begin lex method
-	public static int lex() throws IOException {
-		lexeme = new char[100];
-		lexLen = 0;
-		getNonBlank();
-		switch (charClass){
-		//parse ident.
-		case LETTER:
-			addChar();
-			getChar();
-			while (charClass == LETTER || charClass == DIGIT) {
-				addChar();
-				getChar();
-			}//end while [letter]
-			nextToken = IDENT;
-			break;
-		case DIGIT:
-			addChar();
-			getChar();
-			while (charClass == DIGIT){
-				addChar();
-				getChar();
-			}//end while [digit]
-			nextToken = INT_LIT;
-			break;
-		case UNKNOWN:
-			lookup(nextChar);
-			getChar();
-			break;
-		case EOF:
-			nextToken = EOF;
-				lexeme[0] = 'E';
-				lexeme[1] = 'O';
-				lexeme[2] = 'F';
-				lexeme[3] = 0;
-				break;
-		}//end switch statement
-		if (nextToken != EOF){
-			System.out.printf("Next token is: %-15s Next lexeme is ", nextToken);
-			System.out.println(lexeme);
-		}//end if statement
-		return 0;
-		
-	}//end lex() method
-	
-	public static void nextLine() {
-		index = 0;
-		lexeme = new char[100];
-	}//end nextLine() method
-	
-	//Begin method isThere
-	public static boolean isThere() throws java.lang.StringIndexOutOfBoundsException{
-		try{
-			nextChar = line.charAt(index);
-			index++;
-			return true;
-		}
-		catch(java.lang.StringIndexOutOfBoundsException e){
-			return false;
-		}
-	}
-}// End LexicalAnalyzer
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  /* Global Declarations */
+  /* Variables */
+  static CharacterClass charClass;
+  static String lexeme;
+  static char nextChar;
+  static int count = 0;
+  static int lexLen;
+  static int token;
+  static TokenCodes nextToken;
+  static BufferedReader br;
+  static File fl_in;
+  
+  
+  //Main driver
+  public static void main(String[] args) throws FileNotFoundException, IOException {
+  	
+  	// Open the input data file and process its contents 
+  	fl_in = new File("src/sample.txt");
+  	
+      try{ 
+          br = new BufferedReader(new FileReader(fl_in));
+          
+          System.out.println("Vlad P. Student, CSCI4200-DB, Fall 2018, Lexical Analyzer");
+          
+          try (BufferedReader br = new BufferedReader(new FileReader(fl_in))) {
+       	   String line = null;
+       	   while ((line = br.readLine()) != null) {
+       		   getChar();
+       		   astk();
+       	       System.out.println("\nInput: " + line);
+       	       //Scanner scan = new Scanner(new BufferedReader(new FileReader(fl_in)));
+       	       while(nextToken != TokenCodes.EOF) {
+       	    		   lex();
+       	    		   System.out.println("Next token is:" + " " + nextToken.getValue() + "    " + "\tNext lexeme is:" + " " + new String(lexeme));
+       	       }
+       	       System.out.println("");
+       	   }
+       	  br.close();
+       	}
+          System.out.println("Lexical analysis of the program is complete!");
+      }catch (FileNotFoundException e){
+          System.out.println("Error - File Not Found");
+      }catch (IOException e){
+          System.out.println("Error - IO Exception");
+      }
+      
+  }
+  
+  //Astk method for creating a string of 80 asterisks
+  static void astk() {
+  	for (int i = 0; i<=80; i++) {
+  		System.out.print("*");
+  	}
+  }
+  
+  //lookup method to lookup operators and return tokens
+  static void lookup(char ch){
+      switch(ch){
+          case '(':
+              addChar();
+              nextToken = TokenCodes.LEFT_PAREN;
+              break;
+          case ')':
+              addChar();
+              nextToken = TokenCodes.RIGHT_PAREN;
+              break;
+          case '+':
+              addChar();
+              nextToken = TokenCodes.ADD_OP;
+              break;
+          case '-':
+              addChar();
+              nextToken = TokenCodes.SUB_OP;
+              break;
+          case '*':
+              addChar();
+              nextToken = TokenCodes.MULT_OP;
+              break;
+          case '/':
+              addChar();
+              nextToken = TokenCodes.DIV_OP;
+              break;
+          case '=':
+              addChar();
+              nextToken = TokenCodes.ASSIGN_OP;
+              break;
+          default:
+              addChar();
+              nextToken = TokenCodes.EOF;
+              lexeme = "EOF";
+              break;
+      }
+      
+  }
+  
+  //addChar function to add nextChar to lexeme 
+  static void addChar(){
+      if(lexLen <= 98){
+      	lexeme=lexeme+ nextChar;
+      	lexLen++;
+      }else{
+          System.out.println("Error - lexeme is too long");
+      }
+  }
+  
+  //getChar function to get the next character of input and determine its character class
+  static void getChar(){
+      try {
+          nextChar = (char)br.read();
+          if(nextChar != 0){
+              if(Character.isLetter(nextChar)){
+                  charClass = CharacterClass.LETTER;
+              }else if(Character.isDigit(nextChar)){
+                  charClass = CharacterClass.DIGIT;
+              }else{
+                  charClass = CharacterClass.UNKNOWN;
+              }
+          }else{
+              charClass = CharacterClass.EOF;
+          }
+      } catch (IOException ex) {
+          Logger.getLogger(LexicalAnalyzer.class.getName()).log(Level.SEVERE, null, ex);
+      }
+  }
+  
+  //getNonBlank function to call getChar until it returns a non-whitespace character
+  static void getNonBlank(){
+      while(Character.isWhitespace(nextChar)){
+          getChar();
+      }
+  }
+  
+  //lex - simple lexical analyzer for arithmetic expressions*/ 
+  static void lex(){
+      lexLen = 0;
+      lexeme = "";
+      getNonBlank();
+      switch(charClass){
+          /* Parse Identifiers */
+          case LETTER:
+              addChar();
+              getChar();
+              while(charClass == CharacterClass.LETTER ||
+                      charClass == CharacterClass.DIGIT){
+                  addChar();
+                  getChar();
+              }
+              nextToken = TokenCodes.IDENT;
+              break;
+          /* Parse integer literals */
+          case DIGIT:
+              do{
+                  addChar();
+                  getChar();
+              }
+              while (charClass == CharacterClass.DIGIT);
+              nextToken = TokenCodes.INT_LIT;
+              break;
+          case UNKNOWN:
+              lookup(nextChar);
+              getChar();
+              break;
+          /* EOF */
+          case EOF:
+          	nextToken = TokenCodes.EOF;
+          	lexeme = "EOF";
+              break;
+              
+      }
+  }
+}

@@ -57,7 +57,7 @@ enum TokenCodes{
   }
 }
 
-public class LexicalAnalyzer {
+public class LexicalAnalyzerVlad {
 
   /* Global Declarations */
   /* Variables */

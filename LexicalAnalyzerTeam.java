@@ -3,7 +3,8 @@
 //CSCI-4200 DB
 //Abi Salimi
 
-
+//We put before each section of code who the code belongs to. The reasons why we chose these certain persons code was because 
+//they were they were more efficient / just as efficient as than the rest of the groups. 
 
 import java.io.*;
 
